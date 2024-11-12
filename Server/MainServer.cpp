@@ -3,6 +3,6 @@
 using namespace std;
 
 int main() {
-    MainServer mainServer(0, "localhost", 8080);
+    MainServer mainServer(0, "0.0.0.0", 8080);
     return 0;
 }
