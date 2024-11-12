@@ -82,7 +82,7 @@ class Peer {
 
     public:
         Peer(string ip, string directory, 
-            int port, const string & serverUrl) : client(serverUrl.c_str()) {
+            int port, const string & serverUrl) : client(serverUrl) {
             this->IP = ip;
             this->PORT = port;
             this->directory = directory;

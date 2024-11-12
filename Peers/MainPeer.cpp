@@ -1,7 +1,7 @@
 #include "Peer.h"
 
 int main() {
-    Peer h("h", "../.vscode", 0, "http://localhost:8080");
+    Peer h("h", "../.vscode", 0, "localhost:8080");
     h.connect();
     string h1, h2;
     int in;

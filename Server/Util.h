@@ -1,7 +1,30 @@
 #ifndef UTIL_H
 #define UTIL_H
 #include <bits/stdc++.h>
+
 using namespace std;
+using namespace httplib;
+
+using ll = long long;
+using ull = unsigned ll;
+
+struct melvin {
+    ull hash1;
+    ull hash2;
+    ull size;
+
+    bool operator<(const melvin& other) const {
+        if(hash1==other.hash1 && hash2==other.hash2) return size<other.size;
+        if(hash1==other.hash1) return hash2<other.hash2;
+        return hash1<other.hash1;
+    }
+};
+
+struct hugo {
+    string name;
+    string ip;
+    int port;
+};
 
 bool kmp(string s, string pattern){
     vector<int> b(pattern.size()+1, 0);
