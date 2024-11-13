@@ -23,7 +23,6 @@ struct melvin {
 struct hugo {
     string name;
     string ip;
-    int port;
 };
 
 bool kmp(string s, string pattern){
