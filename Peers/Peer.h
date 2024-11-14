@@ -81,7 +81,8 @@ class Peer {
                 }
                 return filesInfo;
             } catch (const fs::filesystem_error &e) {
-                cerr << "Error al acceder al directorio: " << e.what() << '\n';
+                cerr << "Error al acceder al directorio: " 
+                    << e.what() << '\n';
                 filesInfo.clear();
                 return filesInfo;
             }
@@ -101,7 +102,7 @@ class Peer {
                     res.set_content("Parámetros insuficientes", "text/plain");
                     return;
                 }
-                cout << "Este es viquez: " << viquez[0] << ' ' << viquez[1] << ' ' << viquez[2] << '\n';
+                // cout << "Este es el archivo: " << viquez[0] << ' ' << viquez[1] << ' ' << viquez[2] << '\n';
                 auto file_ptr = make_shared<std::ifstream>(viquez[0], std::ios::binary);
                 if(!file_ptr->is_open()){
                     res.status=404;
@@ -114,7 +115,6 @@ class Peer {
                     sizePart,
                     "application/octet-stream",
                     [file_ptr, startPos](size_t offset, size_t length, net::DataSink& sink) mutable {
-                        cout<<file_ptr->is_open() <<'\n';
                         file_ptr->seekg(startPos+offset);
                         vector<char> buffer(length);
                         file_ptr->read(buffer.data(), length);
@@ -128,14 +128,12 @@ class Peer {
                     }
                 );
             });
-            cout << "Estoy escuchando\n";
             server.listen("0.0.0.0",this->PORT);
         }
 
         int requestPartFile(string ip, string path, ull cantBytes, ull posIni, ll id){
             net::Client peer(ip);
             string s = path+"\n"+to_string(cantBytes)+"\n"+to_string(posIni);
-            cout << "Voy a hacer post: "+s+"\n";
             auto res = peer.Post("/download",s,"application/octet-stream");
             if(res && res->status==200){
                 ofstream outfile(this->directory+"/id="+to_string(id), ios::binary | ios::app);
@@ -190,7 +188,7 @@ class Peer {
         }
         
         void findFile(string name){
-            // h1, h2, tam
+            // h1, h2, tam ,cant, [nombres]
             vs coincidencias;
             string s = "/find?file="+name;
             auto res = client.Get(s.c_str());
@@ -202,9 +200,19 @@ class Peer {
                     coincidencias.push_back(token);
                 }
             } else cerr << "Error al buscar un archivo\n";
-            for (int i = 0; i < coincidencias.size(); i+=3) {
-                cout << (i/3) << " - " << coincidencias[i] << ' ' << coincidencias[1+i] 
-                << ' ' <<coincidencias[2+i] << '\n';
+            ll i = 0, c = 1;
+            cout << "----COINCIDENCIAS----\n";
+            cout << "Hash1 - Hash2 - Tamaño - [ Nombres ]\n";
+            while(i < coincidencias.size()){
+                cout << c << ") " << coincidencias[i] << " - " 
+                << coincidencias[i+1] << " - " << coincidencias[i+2] 
+                << " - [ "; 
+                ll cN = stoll(coincidencias[i+3]), j;
+                for(j = i+4; cN-- ; j++) 
+                    cout << "'" << coincidencias[j] << "'" << " ";
+                cout << "]\n";
+                i = j;
+                c++;
             }
         }
 
@@ -246,7 +254,7 @@ class Peer {
                     while(avaliables.size()){
                         int j = *(avaliables.begin());
                         f = (async(launch::async,bind
-                            (&Peer::requestPartFile, this, owners[j], owners[j+1],
+                            (&Peer::requestPartFile, this, owners[2*j], owners[(2*j)+1],
                             otomanos[i], position[i], i))).get();
                         if(f) break;
                         avaliables.erase(j);

@@ -31,9 +31,9 @@ class MainServer {
                 fileTable.insert({file_data, connect_data});
             }
             mtx.unlock();
-            for(auto a: fileTable){
-                cout<<a.first.hash1<<' '<<a.first.hash2<<' '<<a.first.size<<"--"<<a.second.ip<<' '<<a.second.name<<'\n';
-            }
+            // for(auto a: fileTable){
+            //     cout<<a.first.hash1<<' '<<a.first.hash2<<' '<<a.first.size<<"--"<<a.second.ip<<' '<<a.second.name<<'\n';
+            // }
             return true;
         }
         catch(...){
@@ -44,7 +44,7 @@ class MainServer {
     }
 
     string findFiles(string fileName) {
-        set<melvin> found;
+        map<melvin, vector<string>> found;
         for(auto &entry: fileTable){
             auto &edy=entry.second.name;
             int i;
@@ -52,13 +52,16 @@ class MainServer {
             for(i = edy.size()-1; edy[i] != '/' && i >= 0; i--) 
                 name.push_back(edy[i]);
             reverse(name.begin(), name.end());
-            if(kmp(name, fileName)) found.insert(entry.first);
+            if(kmp(name, fileName)) found[entry.first].push_back(name);
         }
         string res="";
-        for(auto &chanto: found)
-        res += ("" + to_string(chanto.hash1) + 
-            this->separator+to_string(chanto.hash2) + this->separator + to_string(chanto.size) 
-            + this->separator);
+        for(auto &chanto: found){
+            res += ("" + to_string(chanto.first.hash1) + 
+                this->separator+to_string(chanto.first.hash2) + this->separator + to_string(chanto.first.size) 
+                + this->separator+to_string(chanto.second.size())+this->separator);
+            for(auto s: chanto.second) res+=s+this->separator;
+        }
+        cout<<res;
         if(res.size()) res.erase(res.end()-1);
         return res;
     }
@@ -81,7 +84,7 @@ class MainServer {
             return res;
         }
         catch(...){
-            cout << "asd\n";
+            cout << "se cayo diego :)\n";
         }
         return "";
     }
@@ -124,7 +127,7 @@ class MainServer {
                 res.set_content("Error\n", "text/plain");
             }
         });
-        cout << "Servidor escuchando en http://localhost:8080..." << '\n';
+        cout << "Servidor escuchando en " << this->IP << "...\n";
         server.listen(this->IP, this->PORT);
     }
 
